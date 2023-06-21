@@ -8,7 +8,7 @@ exports.getAllUsers = async (req, res, next) => {
     } catch (error) {
         console.log(error);
     }
-}; 
+};     
 
 exports.create = async (req, res, next) => {
     try {
@@ -18,7 +18,8 @@ exports.create = async (req, res, next) => {
 
         return res.status(200).json({ utilisateur });
     } catch (error) {
-        console.log(error);
+        console.log(error); 
     }
 };
-
+ 
+  

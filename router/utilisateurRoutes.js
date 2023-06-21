@@ -6,4 +6,4 @@ router.get("", utilisateurController.getAllUsers);
 
 router.post("", utilisateurController.create);
 
-module.exports = router;
+module.exports = router; 
