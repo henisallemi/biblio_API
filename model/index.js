@@ -1,37 +1,134 @@
-'use strict';
-
-const fs = require('fs');
-const path = require('path');
 const Sequelize = require('sequelize');
-const basename = path.basename(__filename);
-const env = process.env.NODE_ENV || 'development';
-const config = require(__dirname + '/../config/config.js')[env];
-const db = {};
+const dotenv = require("dotenv");
+dotenv.config();
+ 
+const username = process.env.DB_USERNAME;
+const password = process.env.DB_PASSWORD;
+const database = process.env.DB_NAME;
+const host = process.env.DB_HOST;
 
-let sequelize;
-if (config.use_env_variable) {
-  sequelize = new Sequelize(process.env[config.use_env_variable], config);
-} else {
-  sequelize = new Sequelize(config.database, config.username, config.password, config);
-}
-
-fs
-  .readdirSync(__dirname)
-  .filter(file => {
-    return (file.indexOf('.') !== 0) && (file !== basename) && (file.slice(-3) === '.js');
-  })
-  .forEach(file => {
-    const model = require(path.join(__dirname, file))(sequelize, Sequelize.DataTypes);
-    db[model.name] = model;
-  });
-
-Object.keys(db).forEach(modelName => {
-  if (db[modelName].associate) {
-    db[modelName].associate(db);
-  }
+const sequelize = new Sequelize(database, username, password, {
+  "host": host,
+  "dialect": "mysql"
 });
 
-db.sequelize = sequelize;
-db.Sequelize = Sequelize;
+const DataTypes = Sequelize.DataTypes;
+//Ouvrage , Article , Revue , Livre : 
+const Ouvrage = sequelize.define("Ouvrage", {
+  isbn: DataTypes.STRING,
+  titre: DataTypes.STRING,
+  editeur: DataTypes.STRING,
+  annee: DataTypes.STRING,
+  date: DataTypes.DATE,
+  auteur1: DataTypes.STRING,  
+  nombreExemplaire: DataTypes.STRING,
+}) 
 
-module.exports = db;
+const Article = sequelize.define('Article', {
+  conference: DataTypes.STRING
+});
+
+const Livre = sequelize.define("Livre", {
+  auteur2: DataTypes.STRING,
+  auteur3: DataTypes.STRING,
+  auteur4: DataTypes.STRING,
+}); 
+
+const Revue = sequelize.define("Revue", {
+  journal: DataTypes.STRING
+});
+
+
+Livre.hasOne(Ouvrage, {
+  onDelete: "CASCADE",
+  foreignKey: 'livreId'
+})
+
+Ouvrage.belongsTo(Livre, {
+  onDelete: "CASCADE",
+  foreignKey: 'livreId'
+})
+
+Revue.hasOne(Ouvrage, {
+  onDelete: "CASCADE",
+  foreignKey: 'revueId'
+})
+
+Ouvrage.belongsTo(Revue, {
+  onDelete: "CASCADE",
+  foreignKey: 'revueId'
+})
+ 
+Article.hasOne(Ouvrage, {
+  onDelete: "CASCADE",
+  foreignKey: 'articleId'
+})
+
+Ouvrage.belongsTo(Article, {    
+  onDelete: "CASCADE",
+  foreignKey: 'articleId'
+})
+
+//Personne , Auteur , Adherents : 
+const Personne = sequelize.define("Personne", {
+  cin: DataTypes.STRING,
+  nom: DataTypes.STRING,
+  prenom : DataTypes.STRING,
+  telephone : DataTypes.STRING,
+  email : DataTypes.STRING,
+  motDePasse : DataTypes.STRING, 
+})
+const Admin = sequelize.define("Admin", {
+  matricule: DataTypes.STRING,
+}); 
+const Adherent = sequelize.define("Adherent", {
+  numIns: DataTypes.STRING, 
+}); 
+Admin.hasOne(Personne, {
+  onDelete: "CASCADE", 
+  foreignKey: 'adminId'
+})  
+
+Personne.belongsTo(Admin, {
+  onDelete: "CASCADE",
+  foreignKey: 'adminId'
+})
+Adherent.hasOne(Personne, {
+  onDelete: "CASCADE",
+  foreignKey: 'adherentId'
+})
+
+Personne.belongsTo(Adherent, {
+  onDelete: "CASCADE",
+  foreignKey: 'adherentId'
+}) 
+//Les autres Associations :
+Adherent.belongsTo(Ouvrage, {
+  onDelete: "CASCADE",
+  foreignKey: 'adherentId'
+})
+
+Ouvrage.belongsTo(Adherent, {
+  onDelete: "CASCADE",
+  foreignKey: 'ouvrageId'
+})  
+Admin.belongsTo(Ouvrage, {
+  onDelete: "CASCADE",
+  foreignKey: 'adminId'
+})  
+Ouvrage.hasOne(Admin, {
+  onDelete: "CASCADE",
+  foreignKey: 'ouvrageId'
+})     
+
+module.exports = {
+  sequelize,
+  Sequelize,
+  Article,
+  Ouvrage,
+  Livre,
+  Revue,
+  Adherent,
+  Personne,
+  Admin
+}

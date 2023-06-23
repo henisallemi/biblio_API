@@ -1,10 +1,9 @@
-const { Livre, Ouvrage } = require("../model");
+const { Adherent, Personne } = require("../model");
 const Op = require("sequelize").Op;
 const HttpError = require("../misc/Errors/HttpError");
-const { create } = require("./utilisateurController");
 
-exports.getLivres = async (req, res, next) => {
-  try {
+exports.getAdherents = async (req, res, next) => { 
+  try {       
     let { page, limit, recherche, tous } = req.query;
     const likeObj = { [Op.like]: `%${recherche}%` };
     const rechercheAsNumber = parseInt(recherche) || NaN;
@@ -20,65 +19,65 @@ exports.getLivres = async (req, res, next) => {
             rechercheAsNumber ? { id: rechercheAsNumber } : {},
           ],
         },
-      } 
+      }
       : {};
-    const totalCount = await Livre.count();
-    const livres = await Livre.findAll({
+    const totalCount = await Adherent.count();
+    const Adherents = await Adherent.findAll({
       ...search,
       subQuery: false,
       offset: offset,
       ...(!tous ? { limit: limit } : {}),
     });
-    res.status(200).json({ totalCount, livres });
+    res.status(200).json({ totalCount, Adherents });
   } catch (error) {
     console.log(error);
   }
 };
 
-exports.getLivreById = async (req, res, next) => {
+exports.getAdherentById = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
-    const livre = await Livre.findByPk(id);
-    if (!livre)
-      return next(new HttpError(404, "il n'ya pas de livre avec ce id"));
-    res.status(200).json(livre);
-  } catch (error) {
+    const Adherent = await Adherent.findByPk(id);
+    if (!Adherent)
+      return next(new HttpError(404, "il n'ya pas de Adherent avec ce id"));
+    res.status(200).json(Adherent);
+  } catch (error) { 
     console.log(error);
   }
-};
+};   
 
-exports.createLivre = async (req, res, next) => {
+exports.createAdherent = async (req, res, next) => {
   try {
     console.log(req.body);
-    let createdLivre = await Livre.create({ ...req.body });
-    let createdOuvrage = await Ouvrage.create({ ...req.body, livreId: createdLivre.id });
+    let createdAdherent = await Adherent.create({ ...req.body });
+    let createdPersonne = await Personne.create({ ...req.body, AdherentId: createdAdherent.id });
 
-    await createdLivre.setOuvrage(createdOuvrage);
+    await createdAdherent.setPersonne(createdPersonne);
 
-    res.status(201).json({ livre: createdLivre });
+    res.status(201).json({ Adherent: createdAdherent });
   } catch (error) {
     console.log(error);
   }
 }; 
 
-exports.updateLivre = async (req, res, next) => {
+exports.updateAdherent = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
     await Taille.update(req.body, { where: { id: id } });
-    res.status(200).json({ message: "updated livre" });
+    res.status(200).json({ message: "updated Adherent" });
   } catch (error) {
     console.log(error);
   }
 };
 
-exports.deleteLivre = async (req, res, next) => {
+exports.deleteAdherent = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
-    await Livre.destroy({ where: { id: id } });
-    res.status(200).json({ message: "supprimé  livre" });
+    await Adherent.destroy({ where: { id: id } });
+    res.status(200).json({ message: "supprimé  Adherent" });
   } catch (error) {
     console.log(error);
   }

@@ -1,9 +1,9 @@
-const { Ouvrage } = require("../model");
+const { Admin, Personne } = require("../model");
 const Op = require("sequelize").Op;
 const HttpError = require("../misc/Errors/HttpError");
 
-exports.getOuvrages = async (req, res, next) => {
-  try {
+exports.getAdmins = async (req, res, next) => {
+  try { 
     let { page, limit, recherche, tous } = req.query;
     const likeObj = { [Op.like]: `%${recherche}%` };
     const rechercheAsNumber = parseInt(recherche) || NaN;
@@ -12,7 +12,7 @@ exports.getOuvrages = async (req, res, next) => {
     page = parseInt(page) || 1;
     const offset = limit * (page - 1);
     const search = recherche
-      ? {
+      ? { 
         where: {
           [Op.or]: [
             { nom: likeObj },
@@ -20,69 +20,64 @@ exports.getOuvrages = async (req, res, next) => {
           ],
         },
       }
-      : {}; 
-    const totalCount = await Ouvrage.count();
-    const Ouvrages = await Ouvrage.findAll({
+      : {};
+    const totalCount = await Admin.count();
+    const Admins = await Admin.findAll({
       ...search,
       subQuery: false,
       offset: offset,
       ...(!tous ? { limit: limit } : {}),
     });
-    res.status(200).json({ totalCount, Ouvrages });
+    res.status(200).json({ totalCount, Admins });
   } catch (error) {
     console.log(error);
   }
 };
 
-exports.getOuvrageById = async (req, res, next) => {
+exports.getAdminById = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
-    const Ouvrage = await Ouvrage.findByPk(id);
-    if (!Ouvrage)
-      return next(new HttpError(404, "il n'ya pas de Ouvrage avec ce id"));
-    res.status(200).json(Ouvrage);
-  } catch (error) {
-    console.log(error);
-  }
+    const Admin = await Admin.findByPk(id);
+    if (!Admin)
+      return next(new HttpError(404, "il n'ya pas de Admin avec ce id"));
+    res.status(200).json(Admin);
+  } catch (error) { 
+    console.log(error); 
+  } 
 };
 
-exports.createOuvrage = async (req, res, next) => {
+exports.createAdmin = async (req, res, next) => {
   try {
-    const { nom } = req.body;
-    let createdOuvrage = new Ouvrage({
-      isbn,
-      titre,
-      editeur,
-      année,
-      date,
-      auteur1,
-      nombreExemplaire,
-    });
-    await createdOuvrage.save();
-    res.status(201).json({ message: "Ouvrage créé" });
+    console.log(req.body);
+    let createdAdmin = await Admin.create({ ...req.body });
+    let createdPersonne = await Personne.create({ ...req.body, AdminId: createdAdmin.id });
+
+    await createdAdmin.setPersonne(createdPersonne);
+
+    res.status(201).json({ Admin: createdAdmin });
   } catch (error) {
     console.log(error);
   }
-};
+}; 
 
-exports.updateOuvrage = async (req, res, next) => {
+exports.updateAdmin = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
     await Taille.update(req.body, { where: { id: id } });
-    res.status(200).json({ message: "updated Ouvrage" });
+    res.status(200).json({ message: "updated Admin" });
   } catch (error) {
     console.log(error);
   }
 };
 
-exports.deleteOuvrage = async (req, res, next) => {
+exports.deleteAdmin = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
-    await Ouvrage.destroy({ where: { id: id } });
-    res.status(200).json({ message: "supprimé  Ouvrage" });
+    await Admin.destroy({ where: { id: id } });
+    res.status(200).json({ message: "supprimé  Admin" });
   } catch (error) {
     console.log(error);
   }
