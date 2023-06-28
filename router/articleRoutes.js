@@ -9,7 +9,7 @@ router.post("/", ArticleController.createArticle);
 
 router.delete("/:id", ArticleController.deleteArticle);
 
-router.patch("/:id", ArticleController.updateArticle);
+router.put("/:id", ArticleController.updateArticle);
  
 module.exports = router;  
  

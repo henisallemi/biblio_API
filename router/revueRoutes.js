@@ -9,7 +9,7 @@ router.post("/", RevueController.createRevue);
 
 router.delete("/:id", RevueController.deleteRevue);
 
-router.patch("/:id", RevueController.updateRevue);
+router.put("/:id", RevueController.updateRevue);
  
 module.exports = router;  
    

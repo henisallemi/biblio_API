@@ -9,7 +9,7 @@ router.post("/", OuvrageController.createOuvrage);
 
 router.delete("/:id", OuvrageController.deleteOuvrage);
 
-router.patch("/:id", OuvrageController.updateOuvrage);
+router.put("/:id", OuvrageController.updateOuvrage);
  
 module.exports = router;   
   

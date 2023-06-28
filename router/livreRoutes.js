@@ -7,9 +7,9 @@ router.get("/:id", LivreController.getLivreById);
  
 router.post("/", LivreController.createLivre);
 
-router.delete("/:id", LivreController.deleteLivre);
+router.delete("/:id", LivreController.deleteLivre);  
 
-router.patch("/:id", LivreController.updateLivre);
+router.put("/:id", LivreController.updateLivre);
  
-module.exports = router;    
+module.exports = router;     
    
