@@ -1,88 +1,18 @@
-const { Ouvrage } = require("../model");
-const Op = require("sequelize").Op;
-const HttpError = require("../misc/Errors/HttpError");
+const { Ouvrage, User } = require("../model");
 
-exports.getOuvrages = async (req, res, next) => {
+exports.check = async (req, res, next) => {
   try {
-    let { page, limit, recherche, tous } = req.query;
-    const likeObj = { [Op.like]: `%${recherche}%` };
-    const rechercheAsNumber = parseInt(recherche) || NaN;
+    const adherant = await User.findByPk(req.body.adherant);
+    const ouvrage = await Ouvrage.findByPk(req.body.ouvrage);
 
-    limit = parseInt(limit) || 10;
-    page = parseInt(page) || 1;
-    const offset = limit * (page - 1);
-    const search = recherche
-      ? {
-        where: {
-          [Op.or]: [
-            { nom: likeObj },
-            rechercheAsNumber ? { id: rechercheAsNumber } : {},
-          ],
-        },
-      }
-      : {}; 
-    const totalCount = await Ouvrage.count();
-    const Ouvrages = await Ouvrage.findAll({
-      ...search,
-      subQuery: false,
-      offset: offset,
-      ...(!tous ? { limit: limit } : {}),
-    });
-    res.status(200).json({ totalCount, Ouvrages });
-  } catch (error) {
-    console.log(error);
-  }
-};
+    ouvrage.nombreDisponible--;
 
-exports.getOuvrageById = async (req, res, next) => {
-  try {
-    let { id } = req.params;
-    id = Number.parseInt(id);
-    const Ouvrage = await Ouvrage.findByPk(id);
-    if (!Ouvrage)
-      return next(new HttpError(404, "il n'ya pas de Ouvrage avec ce id"));
-    res.status(200).json(Ouvrage);
-  } catch (error) {
-    console.log(error);
-  }
-};
+    
+    await adherant.addOuvrage(ouvrage)
+    
+    await ouvrage.save();
 
-exports.createOuvrage = async (req, res, next) => {
-  try {
-    const { nom } = req.body;
-    let createdOuvrage = new Ouvrage({
-      isbn,
-      titre,
-      editeur,
-      année,
-      date,
-      auteur1,
-      nombreExemplaire,
-    });
-    await createdOuvrage.save();
-    res.status(201).json({ message: "Ouvrage créé" });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-exports.updateOuvrage = async (req, res, next) => {
-  try {
-    let { id } = req.params;
-    id = Number.parseInt(id);
-    await Taille.update(req.body, { where: { id: id } });
-    res.status(200).json({ message: "updated Ouvrage" });
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-exports.deleteOuvrage = async (req, res, next) => {
-  try {
-    let { id } = req.params;
-    id = Number.parseInt(id);
-    await Ouvrage.destroy({ where: { id: id } });
-    res.status(200).json({ message: "supprimé  Ouvrage" });
+    res.status(200).json({});
   } catch (error) {
     console.log(error);
   }

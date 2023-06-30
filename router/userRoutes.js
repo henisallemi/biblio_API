@@ -5,7 +5,11 @@ router.get("/", UserController.getUsers);
 
 router.get("/:id", UserController.getUserById); 
 
+router.get("/role/:role", UserController.getUersByRole); 
+
 router.post("/", UserController.createUser);
+
+router.post("/login", UserController.login);
  
 router.delete("/:id", UserController.deleteUser);
 

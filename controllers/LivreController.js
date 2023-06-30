@@ -1,16 +1,16 @@
-const { Livre, Ouvrage } = require("../model");
-const Op = require("sequelize").Op;
+const { Livre, Ouvrage, Emprunt, User } = require("../model");
+const Sequelize = require("sequelize");
 const HttpError = require("../misc/Errors/HttpError");
 
 exports.getLivres = async (req, res, next) => {
   try {
-    let { page, limit, recherche, tous, target } = req.query;
-    const likeObj = recherche ? { [Op.like]: `%${recherche}%` } : null;
+    let { page, limit, recherche, target } = req.query;
+    const likeObj = recherche ? { [Sequelize.Op.like]: `%${recherche}%` } : null;
 
     limit = parseInt(limit) || 15;
     page = parseInt(page) || 1;
     target = target ?? "";
-console.log(target)
+    console.log(target)
     const offset = limit * (page - 1);
     const totalCount = await Livre.count();
     const livres = await Livre.findAll({
@@ -19,22 +19,22 @@ console.log(target)
           model: Ouvrage,
           options: { eager: true },
           as: "ouvrage",
-          where: target && likeObj ? { 
-            [Op.or]: [
-              target == 1
-                ? { titre: likeObj }
-                : target == 2
-                  ? { auteur1: likeObj }
-                  : target == 3
-                    ? { annee: likeObj }
-                    : {}
-            ],
-          } : {}, 
+          where: target && likeObj ?
+            target == 3 ? Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('date')), new Date(parseInt(recherche), 1))
+              : {
+                [Sequelize.Op.or]: [
+                  target == 1
+                    ? { titre: likeObj }
+                    : target == 2
+                      ? { auteur1: likeObj }
+                      : {}
+                ],
+              } : {},
         },
       ],
       subQuery: false,
       offset: offset,
-      ...(!tous ? { limit: limit } : {}),
+      limit: limit,
 
     });
     res.status(200).json({ totalCount, livres });
@@ -48,7 +48,7 @@ exports.getLivreById = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
-    const livre = await Livre.findByPk(id); 
+    const livre = await Livre.findByPk(id);
     if (!livre)
       return next(new HttpError(404, "il n'ya pas de livre avec ce id"));
     res.status(200).json(livre);
@@ -61,7 +61,7 @@ exports.createLivre = async (req, res, next) => {
   try {
     console.log(req.body);
     let createdLivre = await Livre.create({ ...req.body });
-    let createdOuvrage = await Ouvrage.create({ ...req.body, livreId: createdLivre.id });
+    let createdOuvrage = await Ouvrage.create({ ...req.body, livreId: createdLivre.id, nombreDisponible: req.body.nombreExemplaire });
 
     await createdLivre.setOuvrage(createdOuvrage);
 
