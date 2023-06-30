@@ -17,13 +17,13 @@ const DataTypes = Sequelize.DataTypes;
 const Ouvrage = sequelize.define("Ouvrage", {
   isbn: DataTypes.STRING,
   titre: DataTypes.STRING,
-  editeur: DataTypes.STRING, 
-  annee: DataTypes.STRING,
-  date: DataTypes.DATE,
+  editeur: DataTypes.STRING,     
+  date: DataTypes.STRING,     
   auteur1: DataTypes.STRING,   
-  nombreExemplaire: DataTypes.INTEGER,      
-  description : DataTypes.STRING, 
-}) 
+  nombreExemplaire: DataTypes.INTEGER,
+  nombreDisponible : DataTypes.INTEGER,          
+  description : DataTypes.STRING,  
+})   
    
 const Article = sequelize.define('Article', {
   conference: DataTypes.STRING
@@ -33,7 +33,7 @@ const Livre = sequelize.define("Livre", {
   auteur2: DataTypes.STRING,
   auteur3: DataTypes.STRING,
   auteur4: DataTypes.STRING,
-});  
+});   
 
 const Revue = sequelize.define("Revue", {
   journal: DataTypes.STRING
@@ -67,33 +67,34 @@ Ouvrage.belongsTo(Revue, {
 Article.hasOne(Ouvrage, {
   onDelete: "CASCADE",
   foreignKey: 'articleId',
-  as: "ouvrage"
+  as: "ouvrage" 
 })
 
-Ouvrage.belongsTo(Article, {    
+Ouvrage.belongsTo(Article, {     
   onDelete: "CASCADE",
   foreignKey: 'articleId',
   as: "article"
-})
+})     
 
 //Personne , Auteur , Adherents :  
 const User = sequelize.define("User", {
   image: DataTypes.STRING, 
   cin: DataTypes.STRING,
-  nom: DataTypes.STRING, 
+  nom: DataTypes.STRING,   
   prenom : DataTypes.STRING,
   telephone : DataTypes.STRING,    
   email : DataTypes.STRING,
   motDePasse : DataTypes.STRING, 
+  nombreLivrePrendre : DataTypes.INTEGER, 
   role: DataTypes.INTEGER, 
-}) 
+})  
 
 module.exports = {
-  sequelize,
+  sequelize, 
   Sequelize,
   Article,
   Ouvrage,
   Livre,
   Revue,
   User  
-}
+} 
