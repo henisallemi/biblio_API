@@ -13,7 +13,7 @@ exports.getRevues = async (req, res, next) => {
     const offset = limit * (page - 1);
     const search = recherche 
       ? { 
-        where: {
+        where: {  
           [Op.or]: [
             { nom: likeObj },
             rechercheAsNumber ? { id: rechercheAsNumber } : {},

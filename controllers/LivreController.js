@@ -9,28 +9,28 @@ exports.getLivres = async (req, res, next) => {
 
     limit = parseInt(limit) || 15;
     page = parseInt(page) || 1;
-    target = target ?? "";
+    target = target ?? ""; 
     console.log(target)
     const offset = limit * (page - 1);
     const totalCount = await Livre.count();
     const livres = await Livre.findAll({
-      include: [
+      include: [ 
         {
           model: Ouvrage,
           options: { eager: true },
           as: "ouvrage",
-          where: target && likeObj ?
-            target == 3 ? Sequelize.where(Sequelize.fn('YEAR', Sequelize.col('date')), new Date(parseInt(recherche), 1))
-              : {
-                [Sequelize.Op.or]: [
+          where: target && likeObj ? {   
+                [Sequelize.Op.or]: [ 
                   target == 1
-                    ? { titre: likeObj }
-                    : target == 2
-                      ? { auteur1: likeObj }
-                      : {}
+                  ? { titre: likeObj }
+                  : target == 2
+                  ? { auteur1: likeObj }    
+                  : target == 3
+                  ? { date: likeObj } 
+                  : {} 
                 ],
-              } : {},
-        },
+              } : {},   
+        },   
       ],
       subQuery: false,
       offset: offset,

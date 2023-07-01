@@ -1,7 +1,7 @@
 const router = require("express").Router();
-const ArticleController = require("../controllers/articleController");
+const ArticleController = require("../controllers/ArticleController");
 
-router.get("/", ArticleController.getArticles);    
+router.get("/", ArticleController.getArticles);     
 
 router.get("/:id", ArticleController.getArticleById); 
 
@@ -11,5 +11,5 @@ router.delete("/:id", ArticleController.deleteArticle);
 
 router.put("/:id", ArticleController.updateArticle);
  
-module.exports = router;  
+module.exports = router;   
  

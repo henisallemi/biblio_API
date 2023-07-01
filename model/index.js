@@ -17,17 +17,18 @@ const DataTypes = Sequelize.DataTypes;
 const Ouvrage = sequelize.define("Ouvrage", {
   isbn: DataTypes.STRING,
   titre: DataTypes.STRING,
-  editeur: DataTypes.STRING,
+  editeur: DataTypes.STRING,     
   date: DataTypes.STRING,
   auteur1: DataTypes.STRING,
   nombreExemplaire: DataTypes.INTEGER,
   nombreDisponible: DataTypes.INTEGER,
-  description: DataTypes.STRING,
-})
+  description: DataTypes.STRING,  
+})   
 
 const Article = sequelize.define('Article', {
-  conference: DataTypes.STRING
-});
+  conference: DataTypes.STRING,
+  auteur2: DataTypes.STRING,        
+}); 
 
 const Livre = sequelize.define("Livre", {
   auteur2: DataTypes.STRING,
