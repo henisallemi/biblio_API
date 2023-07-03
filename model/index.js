@@ -17,18 +17,18 @@ const DataTypes = Sequelize.DataTypes;
 const Ouvrage = sequelize.define("Ouvrage", {
   isbn: DataTypes.STRING,
   titre: DataTypes.STRING,
-  editeur: DataTypes.STRING,     
+  editeur: DataTypes.STRING,
   date: DataTypes.STRING,
   auteur1: DataTypes.STRING,
   nombreExemplaire: DataTypes.INTEGER,
   nombreDisponible: DataTypes.INTEGER,
-  description: DataTypes.STRING,  
-})   
+  description: DataTypes.STRING,
+})
 
 const Article = sequelize.define('Article', {
   conference: DataTypes.STRING,
-  auteur2: DataTypes.STRING,        
-}); 
+  auteur2: DataTypes.STRING,
+});
 
 const Livre = sequelize.define("Livre", {
   auteur2: DataTypes.STRING,
@@ -37,9 +37,9 @@ const Livre = sequelize.define("Livre", {
 });
 
 const Revue = sequelize.define("Revue", {
-  journal: DataTypes.STRING
+  auteur2: DataTypes.STRING,
+  numeroVolume: DataTypes.STRING,
 });
-
 
 Livre.hasOne(Ouvrage, {
   onDelete: "CASCADE",
@@ -79,19 +79,33 @@ Ouvrage.belongsTo(Article, {
 
 //Personne , Auteur , Adherents :  
 const User = sequelize.define("User", {
-  image: DataTypes.STRING,
+  imagePath: DataTypes.STRING,
   cin: DataTypes.STRING,
   nom: DataTypes.STRING,
   prenom: DataTypes.STRING,
   telephone: DataTypes.STRING,
   email: DataTypes.STRING,
   motDePasse: DataTypes.STRING,
-  nombreLivrePrendre: DataTypes.INTEGER,
   role: DataTypes.INTEGER,
 })
 
-Ouvrage.belongsToMany(User, { through: "Emprunt" });
-User.belongsToMany(Ouvrage, { through: "Emprunt" });
+const Emprunt = sequelize.define("Emprunt", {
+  dateEmprunt: DataTypes.DATE,
+  dateDeRetour: DataTypes.DATE,
+  isReturned: DataTypes.BOOLEAN,
+})
+
+User.belongsToMany(Ouvrage, {
+  through: Emprunt,
+  foreignKey: 'userId',
+  as: "user"
+});
+
+Ouvrage.belongsToMany(User, {
+  through: Emprunt,
+  foreignKey: 'ouvrageId',
+  as: "ouvrage"
+});
 
 module.exports = {
   sequelize,
@@ -100,5 +114,6 @@ module.exports = {
   Ouvrage,
   Livre,
   Revue,
-  User
-} 
+  User,
+  Emprunt
+}  

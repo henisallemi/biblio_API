@@ -1,19 +1,33 @@
 const router = require("express").Router();
-const UserController = require("../controllers/userController"); 
+const UserController = require("../controllers/userController");
+const multer = require('multer');
+const path = require('path');
 
-router.get("/", UserController.getUsers);   
+const storage = multer.diskStorage({
+    destination: 'uploads/',
+    filename: (req, file, cb) => {
+        const originalName = file.originalname;
+        const ext = path.extname(originalName);
+        const fileName = Date.now() + ext;
+        cb(null, fileName);
+    }
+});
 
-router.get("/:id", UserController.getUserById); 
+const upload = multer({ storage: storage });
 
-router.get("/role/:role", UserController.getUersByRole); 
+router.get("", UserController.getUsers);
 
-router.post("/", UserController.createUser);
+router.get("/:id", UserController.getUserById);
+
+router.get("/role/:role", UserController.getUersByRole);
+
+router.post("", upload.single('image'), UserController.createUser);
 
 router.post("/login", UserController.login);
- 
+
+router.post("/:id", upload.single('image'), UserController.updateUser);
+
 router.delete("/:id", UserController.deleteUser);
 
-router.put("/:id", UserController.updateUser);
- 
-module.exports = router;    
-   
+
+module.exports = router;

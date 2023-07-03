@@ -76,9 +76,13 @@ exports.createUser = async (req, res, next) => {
   try {
     const salt = await bcrypt.genSalt(10);
 
-    const hashedPassword = await bcrypt.hash(req.body.motDePasse, salt); 
+    const hashedPassword = await bcrypt.hash(req.body.motDePasse, salt);
 
-    let createdUser = await User.create({ ...req.body, motDePasse: hashedPassword });
+    let createdUser = await User.create({
+      ...req.body,
+      motDePasse: hashedPassword,
+      imagePath: req.file?.path ?? null
+    });
 
     res.status(201).json({ user: createdUser });
   } catch (error) {
@@ -93,11 +97,11 @@ exports.updateUser = async (req, res, next) => {
     id = Number.parseInt(id);
     const user = await User.findOne({ where: { id } });
 
-    await User.update(body, { where: { id } });
+    await User.update({ ...body, imagePath: req.file?.path ?? user.imagePath }, { where: { id } });
 
     res.status(200).json({ message: "updated user" });
   } catch (error) {
-    console.log(error); 
+    console.log(error);
   }
 };
 

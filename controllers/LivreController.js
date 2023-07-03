@@ -7,7 +7,7 @@ exports.getLivres = async (req, res, next) => {
     let { page, limit, recherche, target } = req.query;
     const likeObj = recherche ? { [Sequelize.Op.like]: `%${recherche}%` } : null;
 
-    limit = parseInt(limit) || 15;
+    limit = parseInt(limit) || 15;  
     page = parseInt(page) || 1;
     target = target ?? ""; 
     console.log(target)
@@ -29,7 +29,7 @@ exports.getLivres = async (req, res, next) => {
                   ? { date: likeObj } 
                   : {} 
                 ],
-              } : {},   
+              } : {},    
         },   
       ],
       subQuery: false,
