@@ -1,5 +1,5 @@
 const router = require("express").Router();
-const UserController = require("../controllers/userController");
+const UserController = require("../controllers/UserController");
 const multer = require('multer');
 const path = require('path');
 
@@ -18,6 +18,8 @@ const upload = multer({ storage: storage });
 router.get("", UserController.getUsers);
 
 router.get("/:id", UserController.getUserById);
+
+router.get("/history/:id", UserController.getHistory);
 
 router.get("/role/:role", UserController.getUersByRole);
 

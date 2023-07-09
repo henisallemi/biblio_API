@@ -8,9 +8,16 @@ const host = process.env.DB_HOST;
 const ADMIN = 1;
 const ADHERANT = 2;
 
+const LIVRE = 1;
+const ARTICLE = 2;
+const REVUE = 3;
+
 module.exports = {
   ADMIN,
   ADHERANT,
+  LIVRE,
+  ARTICLE,
+  REVUE,
   "development": {
     "username": username,
     "password": password,

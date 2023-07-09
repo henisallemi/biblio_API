@@ -17,7 +17,7 @@ const DataTypes = Sequelize.DataTypes;
 const Ouvrage = sequelize.define("Ouvrage", {
   isbn: DataTypes.STRING,
   titre: DataTypes.STRING,
-  editeur: DataTypes.STRING,
+  editeur: DataTypes.STRING,    
   date: DataTypes.STRING,
   auteur1: DataTypes.STRING,
   nombreExemplaire: DataTypes.INTEGER,
@@ -25,7 +25,7 @@ const Ouvrage = sequelize.define("Ouvrage", {
   description: DataTypes.STRING,
 })
 
-const Article = sequelize.define('Article', {
+const Article = sequelize.define('Article', {        
   conference: DataTypes.STRING,
   auteur2: DataTypes.STRING,
 });
@@ -76,8 +76,7 @@ Ouvrage.belongsTo(Article, {
   foreignKey: 'articleId',
   as: "article"
 })
-
-//Personne , Auteur , Adherents :  
+ 
 const User = sequelize.define("User", {
   imagePath: DataTypes.STRING,
   cin: DataTypes.STRING,
@@ -93,7 +92,8 @@ const Emprunt = sequelize.define("Emprunt", {
   dateEmprunt: DataTypes.DATE,
   dateDeRetour: DataTypes.DATE,
   isReturned: DataTypes.BOOLEAN,
-})
+  returnedAt: DataTypes.DATE, 
+})  
 
 User.belongsToMany(Ouvrage, {
   through: Emprunt,
@@ -105,6 +105,24 @@ Ouvrage.belongsToMany(User, {
   through: Emprunt,
   foreignKey: 'ouvrageId',
   as: "ouvrage"
+});
+
+Emprunt.belongsTo(User, {
+  foreignKey: 'userId',
+  as: "user"
+});
+
+Emprunt.belongsTo(Ouvrage, {
+  foreignKey: 'ouvrageId',
+  as: "ouvrage"
+});
+
+User.hasMany(Emprunt, {
+  foreignKey: 'userId',
+});
+
+Ouvrage.hasMany(Emprunt, {
+  foreignKey: 'ouvrageId',
 });
 
 module.exports = {

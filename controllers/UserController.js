@@ -1,7 +1,7 @@
-const { User } = require("../model");
+const { User, Emprunt, Livre, Revue, Article, Ouvrage } = require("../model");
 const Op = require("sequelize").Op;
 const HttpError = require("../misc/Errors/HttpError");
-const { ADHERANT } = require("../config/config");
+const { ADHERANT, LIVRE, ARTICLE, REVUE } = require("../config/config");
 const bcrypt = require('bcrypt');
 
 exports.getUsers = async (req, res, next) => {
@@ -72,6 +72,75 @@ exports.getUserById = async (req, res, next) => {
   }
 };
 
+exports.getHistory = async (req, res, next) => {
+  try {
+    let { id } = req.params;
+    id = Number.parseInt(id);
+    const user = await User.findByPk(id);
+    if (!user)
+      return next(new HttpError(404, "il n'ya pas de user avec ce id"));
+
+    const emprunts = await Emprunt.findAll({
+      where: { userId: user.id }, include: [
+        {
+          model: Ouvrage,
+          include: [
+            {
+              model: Livre,
+              options: { eager: true },
+              as: "livre",
+            },
+            {
+              model: Revue,
+              options: { eager: true },
+              as: "revue",
+            },
+            {
+              model: Article,
+              options: { eager: true },
+              as: "article",
+            },
+          ],
+          options: { eager: true },
+          as: "ouvrage",
+        },
+      ]
+    });
+
+    let nombreLivres = 0
+    let nombreArticles = 0
+    let nombreRevues = 0
+
+    const items = emprunts.map(emprunt => {
+      const ouvrage = emprunt.ouvrage;
+      const type = emprunt.ouvrage.livre ? LIVRE : emprunt.ouvrage.article ? ARTICLE : REVUE
+
+      if (type == LIVRE) {
+        nombreLivres++;
+      } else if (type == ARTICLE) {
+        nombreLivres++;
+      } else {
+        nombreRevues++;
+      }
+      return {
+        ouvrage,
+        emprunt,
+        type
+      }
+    })
+
+    const history = {
+      nombreLivres,
+      nombreArticles,
+      nombreRevues,
+      items
+    }
+    res.status(200).json({history, totalCount: 0});
+  } catch (error) {
+    console.log(error);
+  }
+};
+
 exports.createUser = async (req, res, next) => {
   try {
     const salt = await bcrypt.genSalt(10);
@@ -99,7 +168,7 @@ exports.updateUser = async (req, res, next) => {
 
     await User.update({ ...body, imagePath: req.file?.path ?? user.imagePath }, { where: { id } });
 
-    res.status(200).json({ message: "updated user" });
+    res.status(200).json({ user });
   } catch (error) {
     console.log(error);
   }
