@@ -19,7 +19,7 @@ const Ouvrage = sequelize.define("Ouvrage", {
   titre: DataTypes.STRING,
   editeur: DataTypes.STRING,    
   date: DataTypes.STRING,
-  auteur1: DataTypes.STRING,
+  auteur1: DataTypes.STRING, 
   nombreExemplaire: DataTypes.INTEGER,
   nombreDisponible: DataTypes.INTEGER,
   description: DataTypes.STRING,
@@ -38,7 +38,7 @@ const Livre = sequelize.define("Livre", {
 
 const Revue = sequelize.define("Revue", {
   auteur2: DataTypes.STRING,
-  numeroVolume: DataTypes.STRING,
+  numeroVolume: DataTypes.STRING, 
 });
 
 Livre.hasOne(Ouvrage, {
@@ -57,7 +57,7 @@ Revue.hasOne(Ouvrage, {
   onDelete: "CASCADE",
   foreignKey: 'revueId',
   as: "ouvrage"
-})
+})     
 
 Ouvrage.belongsTo(Revue, {
   onDelete: "CASCADE",

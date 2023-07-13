@@ -4,19 +4,26 @@ exports.check = async (req, res, next) => {
   try {
     const adherant = await User.findByPk(req.body.adherant);
     const ouvrage = await Ouvrage.findByPk(req.body.ouvrage);
+    const existingEmprunt = await Emprunt.findOne({where: {ouvrageId: ouvrage.id, userId: adherant.id}});
 
-    ouvrage.nombreDisponible--;   
+    if (existingEmprunt) {
+      return res.status(203).json({});
+    }
+
+    ouvrage.nombreDisponible--;
+     
 
     const emprunt = await Emprunt.create({
       userId: adherant.id,
       ouvrageId: ouvrage.id,
       ...req.body,
       dateEmprunt: new Date(),
+      isReturned: false
     })
 
     await ouvrage.save();
 
-    res.status(200).json({ emprunt });
+    res.status(200).json({ emprunt });         
   } catch (error) {
     console.log(error);
   }

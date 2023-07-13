@@ -3,6 +3,7 @@ const Op = require("sequelize").Op;
 const HttpError = require("../misc/Errors/HttpError");
 const { ADHERANT, LIVRE, ARTICLE, REVUE } = require("../config/config");
 const bcrypt = require('bcrypt');
+const { retour } = require("./OuvrageController");
 
 exports.getUsers = async (req, res, next) => {
   try {
@@ -91,14 +92,14 @@ exports.getHistory = async (req, res, next) => {
               as: "livre",
             },
             {
-              model: Revue,
-              options: { eager: true },
-              as: "revue",
-            },
-            {
               model: Article,
               options: { eager: true },
               as: "article",
+            },
+            {
+              model: Revue,
+              options: { eager: true },
+              as: "revue",
             },
           ],
           options: { eager: true },
@@ -115,13 +116,16 @@ exports.getHistory = async (req, res, next) => {
       const ouvrage = emprunt.ouvrage;
       const type = emprunt.ouvrage.livre ? LIVRE : emprunt.ouvrage.article ? ARTICLE : REVUE
 
-      if (type == LIVRE) {
-        nombreLivres++;
-      } else if (type == ARTICLE) {
-        nombreLivres++;
-      } else {
-        nombreRevues++;
+      if (!emprunt.isReturned) {
+        if (type == LIVRE) {
+          nombreLivres++;
+        } else if (type == ARTICLE) {
+          nombreArticles++;
+        } else {
+          nombreRevues++;
+        }
       }
+
       return {
         ouvrage,
         emprunt,
@@ -135,7 +139,7 @@ exports.getHistory = async (req, res, next) => {
       nombreRevues,
       items
     }
-    res.status(200).json({history, totalCount: 0});
+    res.status(200).json({ history, totalCount: 0 });
   } catch (error) {
     console.log(error);
   }
@@ -164,9 +168,11 @@ exports.updateUser = async (req, res, next) => {
     let { id } = req.params;
     let body = req.body;
     id = Number.parseInt(id);
-    const user = await User.findOne({ where: { id } });
+    let user = await User.findOne({ where: { id } });
 
     await User.update({ ...body, imagePath: req.file?.path ?? user.imagePath }, { where: { id } });
+
+    user = await User.findOne({ where: { id } });
 
     res.status(200).json({ user });
   } catch (error) {
