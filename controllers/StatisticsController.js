@@ -31,16 +31,16 @@ exports.getAdminDashboard = async (req, res, next) => {
         const numberOfDays = 3; // The number of days to check
 
         const currentDate = new Date(); // Get the current date
-        const startDate = new Date(); // Create a new date object
+        const endDate = new Date(); // Create a new date object
 
-        startDate.setDate(currentDate.getDate() - numberOfDays);
+        endDate.setDate(currentDate.getDate() + numberOfDays);
 
 
         const emprunts = await Emprunt.findAll({
             where: {
                 dateDeRetour: {
-                    [Op.gte]: startDate, // Records created on or after the start date
-                    [Op.lte]: currentDate
+                    [Op.gte]: currentDate, // Records created on or after the start date
+                    [Op.lte]: endDate
                 },
                 isReturned: false
             }, include: [
