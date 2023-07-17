@@ -23,11 +23,11 @@ exports.getAdminDashboard = async (req, res, next) => {
             } else if (articlesStats >= 0.1) {
                 articlesStats = (parseFloat(articlesStats) - (sum - 1.0)).toFixed(1);
             } else {
-                revuesStats = (parseFloat(revuesStats) - (sum - 1.0)).toFixed(1);
-            }
-        }
-
-
+                revuesStats = (parseFloat(revuesStats) - (sum - 1.0)).toFixed(1); 
+            } 
+        } 
+  
+  
         const numberOfDays = 3; // The number of days to check
 
         const currentDate = new Date(); // Get the current date

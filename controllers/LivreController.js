@@ -1,36 +1,37 @@
 const { Livre, Ouvrage, Emprunt, User } = require("../model");
 const Sequelize = require("sequelize");
 const HttpError = require("../misc/Errors/HttpError");
+const { mkactivity } = require("../router/userRoutes");
 
 exports.getLivres = async (req, res, next) => {
   try {
     let { page, limit, recherche, target } = req.query;
     const likeObj = recherche ? { [Sequelize.Op.like]: `%${recherche}%` } : null;
 
-    limit = parseInt(limit) || 15;  
+    limit = parseInt(limit) || 15;
     page = parseInt(page) || 1;
-    target = target ?? ""; 
+    target = target ?? "";
     console.log(target)
     const offset = limit * (page - 1);
     const totalCount = await Livre.count();
     const livres = await Livre.findAll({
-      include: [ 
+      include: [
         {
           model: Ouvrage,
           options: { eager: true },
           as: "ouvrage",
-          where: target && likeObj ? {   
-                [Sequelize.Op.or]: [ 
-                  target == 1
-                  ? { titre: likeObj }
-                  : target == 2
-                  ? { auteur1: likeObj }    
+          where: target && likeObj ? {
+            [Sequelize.Op.or]: [
+              target == 1
+                ? { titre: likeObj }
+                : target == 2
+                  ? { auteur1: likeObj }
                   : target == 3
-                  ? { date: likeObj } 
-                  : {} 
-                ],
-              } : {},    
-        },   
+                    ? { date: likeObj }
+                    : {}
+            ],
+          } : {},
+        },
       ],
       subQuery: false,
       offset: offset,
@@ -77,9 +78,16 @@ exports.updateLivre = async (req, res, next) => {
     let body = req.body;
     id = Number.parseInt(id);
     const livre = await Livre.findOne({ where: { id }, include: { model: Ouvrage, eager: true, as: "ouvrage" } });
+    let nombreExemplaire = livre.ouvrage.nombreExemplaire;
+    let nombreDisponible = livre.ouvrage.nombreDisponible;
+
+    if (body.nombreExemplaire != nombreExemplaire) {
+      nombreDisponible += body.nombreExemplaire - nombreExemplaire;
+      nombreExemplaire = body.nombreExemplaire;
+    }
 
     await Livre.update(body, { where: { id } });
-    await Ouvrage.update(body, { where: { id: livre.ouvrage.id } })
+    await Ouvrage.update({...body, nombreDisponible, nombreExemplaire}, { where: { id: livre.ouvrage.id } })
     res.status(200).json({ message: "updated livre" });
   } catch (error) {
     console.log(error);
@@ -90,9 +98,20 @@ exports.deleteLivre = async (req, res, next) => {
   try {
     let { id } = req.params;
     id = Number.parseInt(id);
+    const livre = await Livre.findOne({ where: { id }, include: { model: Ouvrage, eager: true, as: "ouvrage" } });
+    const emprunts = await Emprunt.findAll({
+      where: {
+        ouvrageId: livre.ouvrage.id
+      }
+    });
+
+    if (emprunts.length) {
+        return res.status(400).json({message: "message d'erreur"});
+    }
+
     await Livre.destroy({ where: { id } })
     res.status(200).json({ message: "supprimé  livre" });
   } catch (error) {
     console.log(error);
   }
-};
+}; 

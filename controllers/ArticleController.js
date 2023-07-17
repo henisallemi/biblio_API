@@ -74,25 +74,44 @@ exports.createArticle = async (req, res, next) => {
 exports.updateArticle = async (req, res, next) => {
   try {
     let { id } = req.params; 
-    let body = req.body;
+    let body = req.body; 
     id = Number.parseInt(id);
     const article = await Article.findOne({ where: { id }, include: { model: Ouvrage, eager: true, as: "ouvrage" } });
+    let nombreExemplaire = article.ouvrage.nombreExemplaire;
+    let nombreDisponible = article.ouvrage.nombreDisponible;
+
+    if (body.nombreExemplaire != nombreExemplaire) {
+      nombreDisponible += body.nombreExemplaire - nombreExemplaire;
+      nombreExemplaire = body.nombreExemplaire;
+    } 
 
     await Article.update(body, { where: { id } });
-    await Ouvrage.update(body, { where: { id: article.ouvrage.id } })
+    await Ouvrage.update({...body, nombreDisponible, nombreExemplaire}, { where: { id: article.ouvrage.id } })
     res.status(200).json({ message: "updated article" });
   } catch (error) {
     console.log(error); 
   }
-}; 
+};
 
-exports.deleteArticle = async (req, res, next) => {
+
+exports.deleteArticle = async (req, res, next) => {  
   try {
-    let { id } = req.params; 
-    id = Number.parseInt(id); 
+    let { id } = req.params;
+    id = Number.parseInt(id);
+    const article = await Article.findOne({ where: { id }, include: { model: Ouvrage, eager: true, as: "ouvrage" } });
+    const emprunts = await Emprunt.findAll({
+      where: {
+        ouvrageId: article.ouvrage.id
+      }
+    });
+
+    if (emprunts.length) {  
+        return res.status(400).json({message: "message d'erreur"});
+    }
+
     await Article.destroy({ where: { id } })
     res.status(200).json({ message: "supprimé  article" });
   } catch (error) {
-    console.log(error);
+    console.log(error);  
   }
-};
+}; 

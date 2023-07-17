@@ -85,6 +85,7 @@ const User = sequelize.define("User", {
   telephone: DataTypes.STRING,
   email: DataTypes.STRING,
   motDePasse: DataTypes.STRING,
+  salt: DataTypes.STRING,
   role: DataTypes.INTEGER,
 })
 

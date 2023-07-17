@@ -21,9 +21,11 @@ router.get("/:id", UserController.getUserById);
 
 router.get("/history/:id", UserController.getHistory);
 
-router.get("/role/:role", UserController.getUersByRole);
+router.get("/role/:role", UserController.getUersByRole);  
 
 router.post("", upload.single('image'), UserController.createUser);
+
+router.post("/:id/password", UserController.updatePassword);
 
 router.post("/login", UserController.login);
 

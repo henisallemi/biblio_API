@@ -153,11 +153,47 @@ exports.createUser = async (req, res, next) => {
 
     let createdUser = await User.create({
       ...req.body,
+      salt,
       motDePasse: hashedPassword,
       imagePath: req.file?.path ?? null
     });
 
     res.status(201).json({ user: createdUser });
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+
+exports.updatePassword = async (req, res, next) => {
+  try {
+
+    const { oldPassword, newPassword } = req.body;
+    let { id } = req.params
+    id = Number.parseInt(id);
+    let user = await User.findOne({ where: { id } });
+
+    if (!user) {
+      return res.status(404).json({})
+    }
+
+    const oldStoredPassword = user.motDePasse;
+
+    const isMatch = await bcrypt.compare(oldPassword, oldStoredPassword);
+
+
+    if (isMatch) {
+      const salt = user.salt;
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      await User.update({ motDePasse: hashedPassword }, { where: { id } });
+      return res.status(200).json({ user });
+
+    } else {
+      return res.status(400).json({ message: "the password is wrong" })
+    }
+
+
   } catch (error) {
     console.log(error);
   }

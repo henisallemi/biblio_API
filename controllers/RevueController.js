@@ -73,26 +73,45 @@ exports.createRevue = async (req, res, next) => {
 
 exports.updateRevue = async (req, res, next) => {
   try {
-    let { id } = req.params;  
-    let body = req.body;
+    let { id } = req.params; 
+    let body = req.body; 
     id = Number.parseInt(id);
     const revue = await Revue.findOne({ where: { id }, include: { model: Ouvrage, eager: true, as: "ouvrage" } });
+    let nombreExemplaire = revue.ouvrage.nombreExemplaire;
+    let nombreDisponible = revue.ouvrage.nombreDisponible;
 
-    await Revue.update(body, { where: { id } });
-    await Ouvrage.update(body, { where: { id: revue.ouvrage.id } })
+    if (body.nombreExemplaire != nombreExemplaire) {
+      nombreDisponible += body.nombreExemplaire - nombreExemplaire;
+      nombreExemplaire = body.nombreExemplaire;
+    } 
+
+    await Revue.update(body, { where: { id } }); 
+    await Ouvrage.update({...body, nombreDisponible, nombreExemplaire}, { where: { id: revue.ouvrage.id } })
     res.status(200).json({ message: "updated revue" });
   } catch (error) {
-    console.log(error);   
+    console.log(error); 
+  } 
+};
+
+
+exports.deleteRevue = async (req, res, next) => {  
+  try {
+    let { id } = req.params;
+    id = Number.parseInt(id); 
+    const revue = await Revue.findOne({ where: { id }, include: { model: Ouvrage, eager: true, as: "ouvrage" } });
+    const emprunts = await Emprunt.findAll({  
+      where: {
+        ouvrageId: revue.ouvrage.id
+      }   
+    }); 
+
+    if (emprunts.length) {      
+        return res.status(400).json({message: "message d'erreur"});
+    }
+
+    await Revue.destroy({ where: { id } })
+    res.status(200).json({ message: "supprimé  revue" }); 
+  } catch (error) {
+    console.log(error);    
   }
 }; 
-
-exports.deleteRevue = async (req, res, next) => {
-  try {    
-    let { id } = req.params; 
-    id = Number.parseInt(id); 
-    await Revue.destroy({ where: { id } })
-    res.status(200).json({ message: "supprimé  revue" });
-  } catch (error) {
-    console.log(error); 
-  }
-};
