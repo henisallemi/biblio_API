@@ -81,14 +81,14 @@ const User = sequelize.define("User", {
   imagePath: DataTypes.STRING,
   cin: DataTypes.STRING,
   nom: DataTypes.STRING,
-  prenom: DataTypes.STRING,
+  prenom: DataTypes.STRING, 
   telephone: DataTypes.STRING,
   email: DataTypes.STRING,
-  motDePasse: DataTypes.STRING,
+  motDePasse: DataTypes.STRING, 
   salt: DataTypes.STRING,
   role: DataTypes.INTEGER,
 })
-
+ 
 const Emprunt = sequelize.define("Emprunt", {
   dateEmprunt: DataTypes.DATE,
   dateDeRetour: DataTypes.DATE,

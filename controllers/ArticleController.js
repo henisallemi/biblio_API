@@ -69,7 +69,7 @@ exports.createArticle = async (req, res, next) => {
   } catch (error) {
     console.log(error); 
   }
-};  
+};   
 
 exports.updateArticle = async (req, res, next) => {
   try {
